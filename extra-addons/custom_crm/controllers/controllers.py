@@ -1,21 +1,19 @@
 # -*- coding: utf-8 -*-
-# from odoo import http
+from odoo import http
+from odoo.http import Response
+import json
 
 
-# class CustomCrm(http.Controller):
-#     @http.route('/custom_crm/custom_crm/', auth='public')
-#     def index(self, **kw):
-#         return "Hello, world"
+class VisitController(http.Controller):
+    @http.route('/api/visits',auth="public", methods=['GET'], csrf=False)
+    def get_visits(self,**kwargs):
+        try:
+            visits = http.request.env['custom_crm.visit'].sudo().search_read(
+                [],
+                ['id','costumer','name','done'],
+            )
+            response = json.dumps(visits,ensure_ascii=False).encode('utf-8')
+            return Response(response, content_type='application/json; charset=utf-8',status=200)
+        except Exception as e:
+            return  Response(json.dumps({'error': str(e)}),content_type='application/json; charset=utf-8',status=505)
 
-#     @http.route('/custom_crm/custom_crm/objects/', auth='public')
-#     def list(self, **kw):
-#         return http.request.render('custom_crm.listing', {
-#             'root': '/custom_crm/custom_crm',
-#             'objects': http.request.env['custom_crm.custom_crm'].search([]),
-#         })
-
-#     @http.route('/custom_crm/custom_crm/objects/<model("custom_crm.custom_crm"):obj>/', auth='public')
-#     def object(self, obj, **kw):
-#         return http.request.render('custom_crm.object', {
-#             'object': obj
-#         })
